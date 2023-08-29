@@ -7,7 +7,7 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BookCollection {
+public class BookCollection implements IBookCollection {
     private LinkedList<Book> books;
     
     public BookCollection() {

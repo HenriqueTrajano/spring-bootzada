@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/biblioteca")
 public class DemoController{
-    private BookCollection books;
+    private IBookCollection books;
 
     @Autowired
-    public DemoController(BookCollection books){
+    public DemoController(IBookCollection books){
         this.books = books;
     }
 
