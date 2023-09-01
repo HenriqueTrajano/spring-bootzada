@@ -8,6 +8,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,13 +22,15 @@ public class BookCollectionJDBC implements IBookCollection{
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Override
     public LinkedList<Book> getAllBooks() {
         List<Book> resp = this.jdbcTemplate.query("SELECT * from books",
             (rs, rowNum) -> 
-                new Book(rs.getLong("indentifier"), rs.getString("title"), rs.getString("author"), rs.getInt("year")));
+                new Book(rs.getLong("identifier"), rs.getString("title"), rs.getString("author"), rs.getInt("yearAux")));
         return new LinkedList<Book>(resp);
     }
 
+    @Override
     public List<String> getAllBookTitles() {
         List<String> resp = this.jdbcTemplate.query("SELECT DISTINCT title from books",
             (rs, rowNum) -> 
@@ -35,6 +38,7 @@ public class BookCollectionJDBC implements IBookCollection{
         return resp;
     }
 
+    @Override
     public Set<String> getAllBookAuthors() {
         List<String> resp = this.jdbcTemplate.query("SELECT DISTINCT author from books",
             (rs, rowNum) -> 
@@ -42,26 +46,30 @@ public class BookCollectionJDBC implements IBookCollection{
         return new HashSet<String>(resp);
     }
 
+
+    @Override
     public List<Book> getBooksByAuthor(String author) {
         List<Book> resp = jdbcTemplate.query(
-                "SELECT DISTINCT * FROM books WHERE author = "+author,
-                (rs, rowNum) -> new Book(rs.getLong("indentifier"), rs.getString("title"), rs.getString("author"), rs.getInt("year")));
+                "SELECT * FROM books WHERE author = "+author,
+                (rs, rowNum) -> new Book(rs.getLong("identifier"), rs.getString("title"), rs.getString("author"), rs.getInt("yearAux")));
         return resp;
     }
 
+    @Override
     public List<Book> getBooksByAuthorAndYear(String author, int year) {
+        
         List<Book> resp = jdbcTemplate.query(
-                "SELECT DISTINCT * FROM books WHERE author = "+author+"AND year = "+year,
-                (rs, rowNum) -> new Book(rs.getLong("indentifier"), rs.getString("title"), rs.getString("author"), rs.getInt("year")));
+                "SELECT DISTINCT * FROM books WHERE author = ? AND yearAux = ?",
+                (rs, rowNum) -> new Book(rs.getLong("identifier"), rs.getString("title"), rs.getString("author"), rs.getInt("yearAux")),
+                author, year);
         return resp;
     }
 
+
+    @Override
     public boolean addBook(Book book) {
-        this.jdbcTemplate.update("INSERT INTO books (identifier, title, author, year) VALUES (?,?,?,?)", book.identifier(), book.title(), book.author(), book.year());
+        this.jdbcTemplate.update("INSERT INTO books (identifier, title, author, yearAux) VALUES (?,?,?,?)", book.identifier(), book.title(), book.author(), book.yearAux());
         return true;
     }
 
-    
-
-    //FAZER MAIS AQUI
 }
